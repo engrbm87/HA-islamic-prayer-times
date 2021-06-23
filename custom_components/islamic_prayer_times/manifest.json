@@ -3,5 +3,6 @@
   "name": "Islamic Prayer Times",
   "documentation": "https://www.home-assistant.io/integrations/islamic_prayer_times",
   "codeowners": ["@engrbm87"],
-  "config_flow": true
+  "config_flow": true,
+  "version": "1.0.0"
 }
