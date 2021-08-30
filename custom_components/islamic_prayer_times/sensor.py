@@ -1,85 +1,59 @@
 """Platform to retrieve Islamic prayer times information for Home Assistant."""
-import logging
 
+from homeassistant.components.sensor import SensorEntity, SensorEntityDescription
+from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import DEVICE_CLASS_TIMESTAMP
-from homeassistant.helpers.dispatcher import async_dispatcher_connect
-from homeassistant.helpers.entity import Entity
+from homeassistant.core import HomeAssistant
+from homeassistant.helpers.typing import StateType
+from homeassistant.helpers.update_coordinator import CoordinatorEntity
 import homeassistant.util.dt as dt_util
 
-from .const import DATA_UPDATED, DOMAIN, PRAYER_TIMES_ICON, SENSOR_TYPES
+from . import IslamicPrayerDataCoordinator
+from .const import DOMAIN, PRAYER_TIMES_ICON, SENSOR_TYPES
 
-_LOGGER = logging.getLogger(__name__)
 
-
-async def async_setup_entry(hass, config_entry, async_add_entities):
+async def async_setup_entry(
+    hass: HomeAssistant, config_entry: ConfigEntry, async_add_entities
+) -> None:
     """Set up the Islamic prayer times sensor platform."""
 
-    client = hass.data[DOMAIN]
+    coordinator = hass.data[DOMAIN]
 
     entities = []
-    for sensor_type in SENSOR_TYPES:
-        if sensor_type in client.today_prayer_times:
-            entities.append(IslamicPrayerTimeSensor(sensor_type, client))
+    for description in SENSOR_TYPES:
+        entities.append(IslamicPrayerTimeSensor(coordinator, description))
 
-    async_add_entities(entities, True)
+    async_add_entities(entities)
 
 
-class IslamicPrayerTimeSensor(Entity):
+class IslamicPrayerTimeSensor(CoordinatorEntity, SensorEntity):
     """Representation of an Islamic prayer time sensor."""
 
-    def __init__(self, sensor_type, client):
+    coordinator: IslamicPrayerDataCoordinator
+    _attr_device_class = DEVICE_CLASS_TIMESTAMP
+    _attr_icon = PRAYER_TIMES_ICON
+    _attr_should_poll = False
+
+    def __init__(
+        self,
+        coordinator: IslamicPrayerDataCoordinator,
+        description: SensorEntityDescription,
+    ) -> None:
         """Initialize the Islamic prayer time sensor."""
-        self.sensor_type = sensor_type
-        self.client = client
+        super().__init__(coordinator)
+        self.entity_description = description
+        self._attr_unique_id = description.key
+        self._attr_device_info = {
+            "identifiers": {(DOMAIN, "Islamic Prayer Times")},
+            "default_name": "Islamic Prayer Times",
+            "entry_type": "service",
+        }
 
     @property
-    def name(self):
-        """Return the name of the sensor."""
-        return f"{self.sensor_type} {SENSOR_TYPES[self.sensor_type]}"
-
-    @property
-    def unique_id(self):
-        """Return the unique id of the entity."""
-        return self.sensor_type
-
-    @property
-    def icon(self):
-        """Icon to display in the front end."""
-        return PRAYER_TIMES_ICON
-
-    @property
-    def state(self):
+    def native_value(self) -> StateType:
         """Return the state of the sensor."""
         return (
-            self.client.today_prayer_times.get(self.sensor_type)
+            self.coordinator.data[self.entity_description.key]
             .astimezone(dt_util.UTC)
             .isoformat()
-        )
-
-    @property
-    def state_attributes(self):
-        """Return future prayer times."""
-        attrs = {}
-        attrs["weekly_prayers"] = []
-        for prayer_times in self.client.weekly_prayer_times:
-            attrs["weekly_prayers"].append(
-                prayer_times[self.sensor_type].astimezone(dt_util.UTC).isoformat()
-            )
-
-        return attrs
-
-    @property
-    def should_poll(self):
-        """Disable polling."""
-        return False
-
-    @property
-    def device_class(self):
-        """Return the device class."""
-        return DEVICE_CLASS_TIMESTAMP
-
-    async def async_added_to_hass(self):
-        """Handle entity which will be added."""
-        self.async_on_remove(
-            async_dispatcher_connect(self.hass, DATA_UPDATED, self.async_write_ha_state)
         )
