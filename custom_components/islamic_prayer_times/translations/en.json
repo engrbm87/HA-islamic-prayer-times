@@ -1,26 +1,43 @@
 {
-  "title": "Islamic Prayer Times",
-  "config": {
-    "step": {
-      "user": {
-        "title": "Set up Islamic Prayer Times",
-        "description": "Do you want to set up Islamic Prayer Times?"
-      }
-    },
-    "abort": {
-      "one_instance_allowed": "Only a single instance is necessary."
-    }
-  },
-  "options": {
-    "step": {
-      "init": {
-        "data": {
-          "calculation_method": "Prayer calculation method",
-          "school": "Asr calculation school",
-          "midnightMode": "Midnight calculation method",
-          "latitudeAdjustmentMethod": "Method for adjusting times for higher latitudes"
+    "config": {
+        "abort": {
+            "single_instance_allowed": "Already configured. Only a single configuration possible."
+        },
+        "step": {
+            "user": {
+                "description": "Do you want to set up Islamic Prayer Times?",
+                "title": "Set up Islamic Prayer Times"
+            }
         }
-      }
-    }
-  }
+    },
+    "options": {
+        "step": {
+            "init": {
+                "data": {
+                    "calculation_method": "Prayer calculation method",
+                    "latitudeAdjustmentMethod": "Method for adjusting times for higher latitudes",
+                    "midnightMode": "Midnight calculation method",
+                    "school": "Asr calculation school"
+                },
+                "description": "Configure calculation parameters",
+                "title": "Islamic Prayer Times options 1/2"
+            },
+            "set_times_tune": {
+                "data": {
+                    "asr_tune": "Asr prayer offset",
+                    "dhuhr_tune": "Dhuhr prayer offset",
+                    "fajr_tune": "Fajr prayer offset",
+                    "imsak_tune": "Imsak prayer offset",
+                    "isha_tune": "Isha prayer offset",
+                    "maghrib_tune": "Maghrib prayer offset",
+                    "midnight_tune": "Midnight time offset",
+                    "sunrise_tune": "Sunrise time offset",
+                    "sunset_tune": "Sunset time offset"
+                },
+                "description": "Set prayer times offset",
+                "title": "Islamic Prayer Times options 2/2"
+            }
+        }
+    },
+    "title": "Islamic Prayer Times"
 }
