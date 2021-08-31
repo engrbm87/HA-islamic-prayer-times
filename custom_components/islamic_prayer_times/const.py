@@ -75,5 +75,3 @@ DEFAULT_MIDNIGHT_MODE: Final = "Standard"
 DEFAULT_LAT_ADJ_METHOD: Final = "Angle Based"
 
 PLATFORMS: Final = ["sensor"]
-
-# DATA_UPDATED = "Islamic_prayer_data_updated"
