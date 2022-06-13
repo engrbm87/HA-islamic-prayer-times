@@ -19,8 +19,7 @@
                     "midnightMode": "Midnight calculation method",
                     "school": "Asr calculation school"
                 },
-                "description": "Configure calculation parameters",
-                "title": "Islamic Prayer Times options 1/2"
+                "description": "Configure calculation parameters"
             },
             "set_times_tune": {
                 "data": {
@@ -34,8 +33,7 @@
                     "sunrise_tune": "Sunrise time offset",
                     "sunset_tune": "Sunset time offset"
                 },
-                "description": "Set prayer times offset",
-                "title": "Islamic Prayer Times options 2/2"
+                "description": "Set prayer times offset"
             }
         }
     },

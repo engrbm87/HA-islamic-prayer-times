@@ -20,8 +20,7 @@
           "midnightMode": "Midnight calculation method",
           "latitudeAdjustmentMethod": "Method for adjusting times for higher latitudes"
         },
-        "description": "Configure calculation parameters",
-        "title": "Islamic Prayer Times options 1/2"
+        "description": "Configure calculation parameters"
       },
       "set_times_tune": {
         "data": {
@@ -35,8 +34,7 @@
           "isha_tune": "Isha prayer offset",
           "midnight_tune": "Midnight time offset"
         },
-        "description": "Set prayer times offset",
-        "title": "Islamic Prayer Times options 2/2"
+        "description": "Set prayer times offset"
       }
     }
   }
