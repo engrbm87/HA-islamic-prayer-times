@@ -1,6 +1,7 @@
 """The islamic_prayer_times component."""
 from __future__ import annotations
 
+from collections.abc import Callable
 from datetime import datetime, timedelta
 import logging
 
@@ -9,6 +10,7 @@ from requests.exceptions import ConnectionError as ConnError
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers.event import async_call_later, async_track_point_in_time
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 import homeassistant.util.dt as dt_util
 
@@ -64,7 +66,7 @@ class IslamicPrayerDataCoordinator(DataUpdateCoordinator):
         )
         self.hass = hass
         self.config_entry: ConfigEntry = config_entry
-        self.event_unsub = None
+        self.event_unsub: Callable[[], None] | None = None
 
     @property
     def calc_method(self):
@@ -146,8 +148,8 @@ class IslamicPrayerDataCoordinator(DataUpdateCoordinator):
 
         _LOGGER.info("Next update scheduled for: %s", next_update_at)
 
-        self.event_unsub = self.hass.helpers.event.async_track_point_in_time(
-            self.async_request_update, next_update_at
+        self.event_unsub = async_track_point_in_time(
+            self.hass, self.async_request_update, next_update_at
         )
 
     async def async_request_update(self, *_) -> None:
@@ -161,13 +163,12 @@ class IslamicPrayerDataCoordinator(DataUpdateCoordinator):
                 self.get_new_prayer_times
             )
         except (exceptions.InvalidResponseError, ConnError) as err:
-            self.hass.helpers.event.async_call_later(60, self.async_request_update)
+            async_call_later(self.hass, 60, self.async_request_update)
             raise UpdateFailed from err
 
-        prayer_times_info: dict[str, datetime | None] = {}
+        prayer_times_info: dict[str, datetime] = {}
         for prayer, time in prayer_times.items():
-            prayer_time = dt_util.parse_datetime(f"{dt_util.now().date()} {time}")
-            if prayer_time is not None:
+            if prayer_time := dt_util.parse_datetime(f"{dt_util.now().date()} {time}"):
                 prayer_times_info[prayer] = prayer_time.replace(
                     tzinfo=dt_util.DEFAULT_TIME_ZONE
                 )
@@ -185,16 +186,13 @@ class IslamicPrayerDataCoordinator(DataUpdateCoordinator):
 
     async def async_update_options(self) -> None:
         """Update calc_method option from old entry."""
-        old_calc_method = self.config_entry.options.get(CONF_CALC_METHOD)
-        if not old_calc_method or old_calc_method in CALC_METHODS:
-            return
-        new_options = {**self.config_entry.options}
-        calc_method = new_options.get(CONF_CALC_METHOD)
-        if calc_method:
-            for method in CALC_METHODS:
-                if calc_method == method.lower():
-                    new_options[CONF_CALC_METHOD] = method
-                    break
+        if old_calc_method := self.config_entry.options.get(CONF_CALC_METHOD):
+            if old_calc_method not in CALC_METHODS:
+                new_options = {**self.config_entry.options}
+                for method in CALC_METHODS:
+                    if old_calc_method == method.lower():
+                        new_options[CONF_CALC_METHOD] = method
+                        break
 
             self.hass.config_entries.async_update_entry(
                 self.config_entry,
