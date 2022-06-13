@@ -11,8 +11,8 @@ PRAYER_TIMES_ICON: Final = "mdi:calendar-clock"
 
 
 SENSOR_TYPES: Final[tuple[SensorEntityDescription, ...]] = (
-    SensorEntityDescription(key="Fajr", name="Fajer prayer"),
-    SensorEntityDescription(key="Dhuhr", name="Dhuhur prayer"),
+    SensorEntityDescription(key="Fajr", name="Fajr prayer"),
+    SensorEntityDescription(key="Dhuhr", name="Dhuhr prayer"),
     SensorEntityDescription(key="Asr", name="Asr prayer"),
     SensorEntityDescription(key="Maghrib", name="Maghrib prayer"),
     SensorEntityDescription(key="Isha", name="Isha prayer"),
@@ -27,7 +27,7 @@ CONF_MIDNIGHT_MODE: Final = "midnightMode"
 CONF_LAT_ADJ_METHOD: Final = "latitudeAdjustmentMethod"
 CONF_TUNE: Final = "tune"
 CONF_IMSAK_TUNE: Final = "imsak_tune"
-CONF_FARJ_TUNE: Final = "fajr_tune"
+CONF_FAJR_TUNE: Final = "fajr_tune"
 CONF_SUNRISE_TUNE: Final = "sunrise_tune"
 CONF_DHUHR_TUNE: Final = "dhuhr_tune"
 CONF_ASR_TUNE: Final = "asr_tune"
@@ -59,7 +59,7 @@ MIDNIGHT_MODES: Final = ["Standard", "Jafari"]
 
 TIMES_TUNE: Final = [
     CONF_IMSAK_TUNE,
-    CONF_FARJ_TUNE,
+    CONF_FAJR_TUNE,
     CONF_SUNRISE_TUNE,
     CONF_DHUHR_TUNE,
     CONF_ASR_TUNE,
