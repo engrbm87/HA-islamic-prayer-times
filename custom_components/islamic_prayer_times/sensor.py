@@ -50,7 +50,7 @@ class IslamicPrayerTimeSensor(CoordinatorEntity, SensorEntity):
         }
 
     @property
-    def state(self) -> StateType:
+    def native_value(self) -> StateType:
         """Return the state of the sensor."""
         return (
             self.coordinator.data[self.entity_description.key]
