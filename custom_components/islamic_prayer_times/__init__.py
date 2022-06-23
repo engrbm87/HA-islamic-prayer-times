@@ -194,10 +194,10 @@ class IslamicPrayerDataCoordinator(DataUpdateCoordinator):
                         new_options[CONF_CALC_METHOD] = method
                         break
 
-            self.hass.config_entries.async_update_entry(
-                self.config_entry,
-                options={**self.config_entry.options, **new_options},
-            )
+                self.hass.config_entries.async_update_entry(
+                    self.config_entry,
+                    options={**self.config_entry.options, **new_options},
+                )
 
 
 async def async_options_updated(hass: HomeAssistant, entry: ConfigEntry) -> None:
