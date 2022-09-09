@@ -1,9 +1,14 @@
 """Config flow for Islamic Prayer Times integration."""
+from __future__ import annotations
+
+from typing import Any
+
 import voluptuous as vol
 
 from homeassistant import config_entries
 from homeassistant.core import callback
 from homeassistant.data_entry_flow import FlowResult
+from homeassistant.helpers import selector
 
 from .const import (
     CALC_METHODS,
@@ -57,7 +62,9 @@ class IslamicPrayerOptionsFlowHandler(config_entries.OptionsFlow):
         self.config_entry = config_entry
         self.options = dict(config_entry.options)
 
-    async def async_step_init(self, user_input: dict = None) -> FlowResult:
+    async def async_step_init(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
         """Manage options."""
         if user_input is not None:
             self.options.update(user_input)
@@ -69,30 +76,38 @@ class IslamicPrayerOptionsFlowHandler(config_entries.OptionsFlow):
                 default=self.config_entry.options.get(
                     CONF_CALC_METHOD, DEFAULT_CALC_METHOD
                 ),
-            ): vol.In(CALC_METHODS),
+            ): selector.SelectSelector(
+                selector.SelectSelectorConfig(options=CALC_METHODS)
+            ),
             vol.Optional(
                 CONF_SCHOOL,
                 default=self.config_entry.options.get(CONF_SCHOOL, DEFAULT_SCHOOL),
-            ): vol.In(SCHOOLS),
+            ): selector.SelectSelector(selector.SelectSelectorConfig(options=SCHOOLS)),
             vol.Optional(
                 CONF_MIDNIGHT_MODE,
                 default=self.config_entry.options.get(
                     CONF_MIDNIGHT_MODE, DEFAULT_MIDNIGHT_MODE
                 ),
-            ): vol.In(MIDNIGHT_MODES),
+            ): selector.SelectSelector(
+                selector.SelectSelectorConfig(options=MIDNIGHT_MODES)
+            ),
             vol.Optional(
                 CONF_LAT_ADJ_METHOD,
                 default=self.config_entry.options.get(
                     CONF_LAT_ADJ_METHOD, DEFAULT_LAT_ADJ_METHOD
                 ),
-            ): vol.In(LAT_ADJ_METHODS),
+            ): selector.SelectSelector(
+                selector.SelectSelectorConfig(options=LAT_ADJ_METHODS)
+            ),
         }
 
         return self.async_show_form(
             step_id="init", data_schema=vol.Schema(options), last_step=False
         )
 
-    async def async_step_set_times_tune(self, user_input: dict = None) -> FlowResult:
+    async def async_step_set_times_tune(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
         """Set time tunes for prayer times."""
         if user_input is not None:
             self.options[CONF_TUNE] = {}
@@ -109,7 +124,14 @@ class IslamicPrayerOptionsFlowHandler(config_entries.OptionsFlow):
                     vol.Optional(
                         time_tune,
                         default=time_tune_options.get(time_tune, 0),
-                    ): int
+                    ): vol.All(
+                        selector.NumberSelector(
+                            selector.NumberSelectorConfig(
+                                mode=selector.NumberSelectorMode.BOX
+                            )
+                        ),
+                        vol.Coerce(int),
+                    )
                 }
             )
         return self.async_show_form(

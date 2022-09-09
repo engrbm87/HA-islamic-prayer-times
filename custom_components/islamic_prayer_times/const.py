@@ -3,23 +3,10 @@ from __future__ import annotations
 
 from typing import Final
 
-from homeassistant.components.sensor import SensorEntityDescription
-
 DOMAIN: Final = "islamic_prayer_times"
 NAME: Final = "Islamic Prayer Times"
 PRAYER_TIMES_ICON: Final = "mdi:calendar-clock"
 
-
-SENSOR_TYPES: Final[tuple[SensorEntityDescription, ...]] = (
-    SensorEntityDescription(key="Fajr", name="Fajr prayer"),
-    SensorEntityDescription(key="Dhuhr", name="Dhuhr prayer"),
-    SensorEntityDescription(key="Asr", name="Asr prayer"),
-    SensorEntityDescription(key="Maghrib", name="Maghrib prayer"),
-    SensorEntityDescription(key="Isha", name="Isha prayer"),
-    SensorEntityDescription(key="Sunrise", name="Sunrise time"),
-    SensorEntityDescription(key="Imsak", name="Imsak time"),
-    SensorEntityDescription(key="Midnight", name="Midnight time"),
-)
 
 CONF_CALC_METHOD: Final = "calculation_method"
 CONF_SCHOOL: Final = "school"
