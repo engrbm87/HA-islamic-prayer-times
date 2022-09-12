@@ -1,6 +1,4 @@
 {
-    "domains": ["sensor"],
-    "iot_class": "Cloud Polling",
     "name": "Islamic Prayer Times",
     "homeassistant": "2022.9.0",
     "render_readme": true
