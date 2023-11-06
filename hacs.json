@@ -1,5 +1,5 @@
 {
-    "name": "Islamic Prayer Times",
-    "homeassistant": "2022.9.0",
-    "render_readme": true
-  }
+  "name": "Islamic Prayer Times",
+  "homeassistant": "2022.11.0",
+  "render_readme": true
+}
