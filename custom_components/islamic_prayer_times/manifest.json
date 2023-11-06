@@ -6,6 +6,6 @@
   "documentation": "https://www.home-assistant.io/integrations/islamic_prayer_times",
   "iot_class": "cloud_polling",
   "loggers": ["prayer_times_calculator"],
-  "requirements": ["prayer_times_calculator==0.0.6"],
-  "version": "2022.9.0"
+  "requirements": ["prayer_times_calculator==0.0.8"],
+  "version": "2022.11.0"
 }
