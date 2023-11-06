@@ -3,12 +3,26 @@ from __future__ import annotations
 
 from typing import Any
 
+from prayer_times_calculator import PrayerTimesCalculator
+from prayer_times_calculator.exceptions import InvalidResponseError
+from requests.exceptions import ConnectionError as ConnError
 import voluptuous as vol
 
 from homeassistant import config_entries
-from homeassistant.core import callback
+from homeassistant.const import CONF_LATITUDE, CONF_LOCATION, CONF_LONGITUDE, CONF_NAME
+from homeassistant.core import HomeAssistant, callback
 from homeassistant.data_entry_flow import FlowResult
-from homeassistant.helpers import selector
+from homeassistant.helpers.selector import (
+    LocationSelector,
+    NumberSelector,
+    NumberSelectorConfig,
+    NumberSelectorMode,
+    SelectSelector,
+    SelectSelectorConfig,
+    SelectSelectorMode,
+    TextSelector,
+)
+import homeassistant.util.dt as dt_util
 
 from .const import (
     CALC_METHODS,
@@ -30,6 +44,24 @@ from .const import (
 )
 
 
+async def async_validate_location(
+    hass: HomeAssistant, lon: float, lat: float
+) -> dict[str, str]:
+    """Check if the selected location is valid."""
+    errors = {}
+    calc = PrayerTimesCalculator(
+        latitude=lat,
+        longitude=lon,
+        calculation_method=DEFAULT_CALC_METHOD,
+        date=str(dt_util.now().date()),
+    )
+    try:
+        await hass.async_add_executor_job(calc.fetch_prayer_times)
+    except (InvalidResponseError, ConnError):
+        errors["base"] = "invalid_location"
+    return errors
+
+
 class IslamicPrayerFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
     """Handle the Islamic Prayer config flow."""
 
@@ -39,19 +71,43 @@ class IslamicPrayerFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
     @callback
     def async_get_options_flow(
         config_entry: config_entries.ConfigEntry,
-    ) -> config_entries.OptionsFlow:
+    ) -> IslamicPrayerOptionsFlowHandler:
         """Get the options flow for this handler."""
         return IslamicPrayerOptionsFlowHandler(config_entry)
 
-    async def async_step_user(self, user_input=None) -> FlowResult:
+    async def async_step_user(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
         """Handle a flow initialized by the user."""
-        if self._async_current_entries():
-            return self.async_abort(reason="single_instance_allowed")
+        errors = {}
 
-        if user_input is None:
-            return self.async_show_form(step_id="user")
+        if user_input is not None:
+            lat: float = user_input[CONF_LOCATION][CONF_LATITUDE]
+            lon: float = user_input[CONF_LOCATION][CONF_LONGITUDE]
 
-        return self.async_create_entry(title=NAME, data=user_input)
+            if not (errors := await async_validate_location(self.hass, lat, lon)):
+                await self.async_set_unique_id(f"{lat}-{lon}")
+                self._abort_if_unique_id_configured()
+                return self.async_create_entry(
+                    title=user_input[CONF_NAME], data=user_input
+                )
+
+        home_location = {
+            CONF_LATITUDE: self.hass.config.latitude,
+            CONF_LONGITUDE: self.hass.config.longitude,
+        }
+        return self.async_show_form(
+            step_id="user",
+            data_schema=vol.Schema(
+                {
+                    vol.Optional(CONF_NAME, default=NAME): TextSelector(),
+                    vol.Required(
+                        CONF_LOCATION, default=home_location
+                    ): LocationSelector(),
+                }
+            ),
+            errors=errors,
+        )
 
 
 class IslamicPrayerOptionsFlowHandler(config_entries.OptionsFlow):
@@ -68,7 +124,7 @@ class IslamicPrayerOptionsFlowHandler(config_entries.OptionsFlow):
         """Manage options."""
         if user_input is not None:
             self.options.update(user_input)
-            return await self.async_step_set_times_tune()
+            return await self.async_step_times_tune()
 
         options = {
             vol.Optional(
@@ -76,28 +132,46 @@ class IslamicPrayerOptionsFlowHandler(config_entries.OptionsFlow):
                 default=self.config_entry.options.get(
                     CONF_CALC_METHOD, DEFAULT_CALC_METHOD
                 ),
-            ): selector.SelectSelector(
-                selector.SelectSelectorConfig(options=CALC_METHODS)
-            ),
-            vol.Optional(
-                CONF_SCHOOL,
-                default=self.config_entry.options.get(CONF_SCHOOL, DEFAULT_SCHOOL),
-            ): selector.SelectSelector(selector.SelectSelectorConfig(options=SCHOOLS)),
-            vol.Optional(
-                CONF_MIDNIGHT_MODE,
-                default=self.config_entry.options.get(
-                    CONF_MIDNIGHT_MODE, DEFAULT_MIDNIGHT_MODE
-                ),
-            ): selector.SelectSelector(
-                selector.SelectSelectorConfig(options=MIDNIGHT_MODES)
+            ): SelectSelector(
+                SelectSelectorConfig(
+                    options=CALC_METHODS,
+                    mode=SelectSelectorMode.DROPDOWN,
+                    translation_key=CONF_CALC_METHOD,
+                )
             ),
             vol.Optional(
                 CONF_LAT_ADJ_METHOD,
                 default=self.config_entry.options.get(
                     CONF_LAT_ADJ_METHOD, DEFAULT_LAT_ADJ_METHOD
                 ),
-            ): selector.SelectSelector(
-                selector.SelectSelectorConfig(options=LAT_ADJ_METHODS)
+            ): SelectSelector(
+                SelectSelectorConfig(
+                    options=LAT_ADJ_METHODS,
+                    mode=SelectSelectorMode.DROPDOWN,
+                    translation_key=CONF_LAT_ADJ_METHOD,
+                )
+            ),
+            vol.Optional(
+                CONF_MIDNIGHT_MODE,
+                default=self.config_entry.options.get(
+                    CONF_MIDNIGHT_MODE, DEFAULT_MIDNIGHT_MODE
+                ),
+            ): SelectSelector(
+                SelectSelectorConfig(
+                    options=MIDNIGHT_MODES,
+                    mode=SelectSelectorMode.DROPDOWN,
+                    translation_key=CONF_MIDNIGHT_MODE,
+                )
+            ),
+            vol.Optional(
+                CONF_SCHOOL,
+                default=self.config_entry.options.get(CONF_SCHOOL, DEFAULT_SCHOOL),
+            ): SelectSelector(
+                SelectSelectorConfig(
+                    options=SCHOOLS,
+                    mode=SelectSelectorMode.DROPDOWN,
+                    translation_key=CONF_SCHOOL,
+                )
             ),
         }
 
@@ -105,7 +179,7 @@ class IslamicPrayerOptionsFlowHandler(config_entries.OptionsFlow):
             step_id="init", data_schema=vol.Schema(options), last_step=False
         )
 
-    async def async_step_set_times_tune(
+    async def async_step_times_tune(
         self, user_input: dict[str, Any] | None = None
     ) -> FlowResult:
         """Set time tunes for prayer times."""
@@ -117,25 +191,23 @@ class IslamicPrayerOptionsFlowHandler(config_entries.OptionsFlow):
             return self.async_create_entry(title="", data=self.options)
 
         time_tune_options = self.config_entry.options.get(CONF_TUNE, {})
-        form_options = {}
+        options = {}
         for time_tune in TIMES_TUNE:
-            form_options.update(
+            options.update(
                 {
                     vol.Optional(
                         time_tune,
                         default=time_tune_options.get(time_tune, 0),
                     ): vol.All(
-                        selector.NumberSelector(
-                            selector.NumberSelectorConfig(
-                                mode=selector.NumberSelectorMode.BOX
-                            )
+                        NumberSelector(
+                            NumberSelectorConfig(mode=NumberSelectorMode.BOX)
                         ),
                         vol.Coerce(int),
                     )
                 }
             )
         return self.async_show_form(
-            step_id="set_times_tune",
-            data_schema=vol.Schema(form_options),
+            step_id="times_tune",
+            data_schema=vol.Schema(options),
             last_step=True,
         )

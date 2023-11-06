@@ -5,60 +5,60 @@ from typing import Final
 
 DOMAIN: Final = "islamic_prayer_times"
 NAME: Final = "Islamic Prayer Times"
-PRAYER_TIMES_ICON: Final = "mdi:calendar-clock"
 
-
+CONF_HIJRI_DATE: Final = "hijri_date"
 CONF_CALC_METHOD: Final = "calculation_method"
-CONF_SCHOOL: Final = "school"
-CONF_MIDNIGHT_MODE: Final = "midnightMode"
-CONF_LAT_ADJ_METHOD: Final = "latitudeAdjustmentMethod"
-CONF_TUNE: Final = "tune"
-CONF_IMSAK_TUNE: Final = "imsak_tune"
-CONF_FAJR_TUNE: Final = "fajr_tune"
-CONF_SUNRISE_TUNE: Final = "sunrise_tune"
-CONF_DHUHR_TUNE: Final = "dhuhr_tune"
-CONF_ASR_TUNE: Final = "asr_tune"
-CONF_MAGHRIB_TUNE: Final = "maghrib_tune"
-CONF_SUNSET_TUNE: Final = "sunset_tune"
-CONF_ISHA_TUNE: Final = "isha_tune"
-CONF_MIDNIGHT_TUNE: Final = "midnight_tune"
 
 CALC_METHODS: Final = [
-    "Jafari",
-    "ISNA",
-    "Makkah",
-    "MWL",
+    "jafari",
     "karachi",
-    "Egypt",
-    "Tehran",
-    "Gulf",
-    "Kuwait",
-    "Qatar",
-    "Singapore",
-    "France",
-    "Turkey",
-    "Russia",
+    "isna",
+    "mwl",
+    "makkah",
+    "egypt",
+    "tehran",
+    "gulf",
+    "kuwait",
+    "qatar",
+    "singapore",
+    "france",
+    "turkey",
+    "russia",
+    "moonsighting",
+    "custom",
 ]
+DEFAULT_CALC_METHOD: Final = "isna"
 
-SCHOOLS: Final = ["Shafi", "Hanafi"]
-LAT_ADJ_METHODS: Final = ["Middle of the Night", "One Seventh", "Angle Based"]
-MIDNIGHT_MODES: Final = ["Standard", "Jafari"]
+CONF_LAT_ADJ_METHOD: Final = "latitude_adjustment_method"
+LAT_ADJ_METHODS: Final = ["middle_of_the_night", "one_seventh", "angle_based"]
+DEFAULT_LAT_ADJ_METHOD: Final = "middle_of_the_night"
 
+CONF_MIDNIGHT_MODE: Final = "midnight_mode"
+MIDNIGHT_MODES: Final = ["standard", "jafari"]
+DEFAULT_MIDNIGHT_MODE: Final = "standard"
+
+CONF_SCHOOL: Final = "school"
+SCHOOLS: Final = ["shafi", "hanafi"]
+DEFAULT_SCHOOL: Final = "shafi"
+
+CONF_TUNE: Final = "tune"
+IMSAK_TUNE: Final = "imsak_tune"
+FAJR_TUNE: Final = "fajr_tune"
+SUNRISE_TUNE: Final = "sunrise_tune"
+DHUHR_TUNE: Final = "dhuhr_tune"
+ASR_TUNE: Final = "asr_tune"
+MAGHRIB_TUNE: Final = "maghrib_tune"
+SUNSET_TUNE: Final = "sunset_tune"
+ISHA_TUNE: Final = "isha_tune"
+MIDNIGHT_TUNE: Final = "midnight_tune"
 TIMES_TUNE: Final = [
-    CONF_IMSAK_TUNE,
-    CONF_FAJR_TUNE,
-    CONF_SUNRISE_TUNE,
-    CONF_DHUHR_TUNE,
-    CONF_ASR_TUNE,
-    CONF_MAGHRIB_TUNE,
-    CONF_SUNSET_TUNE,
-    CONF_ISHA_TUNE,
-    CONF_MIDNIGHT_TUNE,
+    IMSAK_TUNE,
+    FAJR_TUNE,
+    SUNRISE_TUNE,
+    DHUHR_TUNE,
+    ASR_TUNE,
+    MAGHRIB_TUNE,
+    SUNSET_TUNE,
+    ISHA_TUNE,
+    MIDNIGHT_TUNE,
 ]
-
-DEFAULT_CALC_METHOD: Final = "ISNA"
-DEFAULT_SCHOOL: Final = "Shafi"
-DEFAULT_MIDNIGHT_MODE: Final = "Standard"
-DEFAULT_LAT_ADJ_METHOD: Final = "Angle Based"
-
-PLATFORMS: Final = ["sensor"]
